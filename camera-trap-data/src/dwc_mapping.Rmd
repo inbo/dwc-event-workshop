@@ -1,0 +1,232 @@
+---
+title: "Darwin Core mapping"
+subtitle: "For: dwc:event workshop: camera trapping data"
+author:
+- Lien Reyserhove
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    df_print: paged
+    number_sections: true
+    toc: true
+    toc_depth: 3
+    toc_float: true
+---
+
+Install packages
+
+```{r}
+install.packages("frictionless")
+devtools::install_github("inbo/camtraptor")
+```
+
+Load packages
+
+```{r}
+library(frictionless)
+library(camtraptor)
+library(tidyverse)      # To do data science
+```
+# Frictionless data
+
+```{r}
+frictionless_data <- read_package("https://raw.githubusercontent.com/tdwg/camtrap-dp/1.0/example/datapackage.json") 
+
+deployments <- read_resource(frictionless_data, "deployments")
+observations <- read_resource(frictionless_data, "observations")
+media <- read_resource(frictionless_data, "media")
+```
+
+# Darwin Core occurrence
+
+## Occurrence Core
+
+```{r}
+  dwc_occurrence <-
+    deployments %>%
+    dplyr::right_join(
+      observations,
+      by = "deploymentID",
+      suffix = c(".dep", ".obs")
+    ) %>%
+    dplyr::mutate(
+      .keep = "none",
+      type = "Image",
+      license = "license",
+      rightsHolder = "rights_holder",
+      datasetID = "dataset_id",
+      collectionCode = "collection_code",
+      datasetName = "dataset_name",
+      basisOfRecord = "MachineObservation",
+
+## Occurrence
+                
+      occurrenceID = observationID,
+      individualCount = count,
+      sex = sex,
+      lifeStage =  lifeStage,
+      behavior = behavior,
+      occurrenceStatus = "present",
+      
+## Event
+      
+      eventID = eventID,
+      parentEventID = deploymentID,
+#     eventDate = format(.data$timestamp, format = "%Y-%m-%dT%H:%M:%SZ"),
+      habitat = habitat,
+      samplingProtocol = "camera trap",
+      samplingEffort = glue::glue(
+        "{start}/{end}",
+        start = format(eventStart, format = "%Y-%m-%dT%H:%M:%SZ"),
+        end = format(eventEnd, format = "%Y-%m-%dT%H:%M:%SZ")
+      ),
+      eventRemarks = "E.g. camera trap with bait near burrow | tags: <t1, t2> | <comment>",
+
+      locationID = locationID,
+      locality = locationName,
+      decimalLatitude = latitude,
+      decimalLongitude = longitude,
+      geodeticDatum = "EPSG:4326", # WGS84
+      coordinateUncertaintyInMeters = coordinateUncertainty,
+      coordinatePrecision = "coordinate_precision",
+      identifiedBy = classifiedBy,
+      dateIdentified = format(
+        classificationTimestamp,
+        format = "%Y-%m-%dT%H:%M:%SZ"
+      ),
+      identificationRemarks = "{classification_method} {classification_certainty}",
+
+      scientificName = .data$scientificName,
+      kingdom = "Animalia") %>%
+    # Set column order
+    dplyr::select(
+      "type", "license", "rightsHolder", "datasetID", "collectionCode",
+      "datasetName", "basisOfRecord", "occurrenceID",
+      "individualCount", "sex", "lifeStage", "behavior", "occurrenceStatus",
+      "eventID", "parentEventID",
+#      "eventDate", 
+      "habitat", "samplingProtocol", "samplingEffort",
+     "eventRemarks", "locationID", "locality", "decimalLatitude",
+      "decimalLongitude", "geodeticDatum", "coordinateUncertaintyInMeters",
+      "coordinatePrecision", "identifiedBy", "dateIdentified",
+      "identificationRemarks", "scientificName", "kingdom"
+    )
+
+```
+
+## Audubon Extension
+
+Create auduboncore
+Media can be linked to observations via sequenceID or mediaID
+Create mutually exclusive data frames for both cases and union (next step)
+
+```{r}
+on_seq <-
+    observations %>%
+    dplyr::filter(is.na(mediaID)) %>%
+    dplyr::left_join(media, by = "sequenceID", suffix = c(".obs", "")) %>%
+    dplyr::select(dplyr::all_of(
+      c("observationID", "timestamp", colnames(media))
+      ))
+```
+```{r}
+on_med <-
+    observations %>%
+    dplyr::filter(!is.na(mediaID)) %>%
+    dplyr::left_join(media, by = "mediaID", suffix = c(".obs", "")) %>%
+    dplyr::select(dplyr::all_of(
+      c("observationID", "timestamp", colnames(media)
+    )))
+```
+
+
+
+
+  dwc_audubon <-
+    dplyr::bind_rows(on_seq, on_med) %>%
+    dplyr::left_join(
+      deployments,
+      by = "deploymentID",
+      suffix = c(".obs_med", ".dep")
+    ) %>%
+    dplyr::arrange(.data$deploymentID, .data$timestamp, .data$fileName) %>%
+    dplyr::mutate(
+      .keep = "none",
+      occurrenceID = .data$observationID,
+      identifier = .data$mediaID,
+      `dc:type` = dplyr::case_when(
+        grepl("video", fileMediatype) ~ "MovingImage",
+        .default = "StillImage"
+      ),
+      comments = dplyr::case_when(
+        !is.na(favourite) & !is.na(comments.obs_med)
+          ~ paste("marked as favourite", comments.obs_med, sep = " | "),
+        !is.na(favourite) ~ "marked as favourite",
+        .default = .data$comments.obs_med
+      ),
+      `dcterms:rights` = media_license,
+      CreateDate = format(.data$timestamp, format = "%Y-%m-%dT%H:%M:%SZ"),
+      captureDevice = .data$cameraModel,
+      resourceCreationTechnique = dplyr::recode(
+        .data$captureMethod,
+        "motionDetection" = "motion detection",
+        "timeLapse" = "time lapse"
+      ),
+      accessURI = .data$filePath,
+      # serviceExpectation = dplyr::if_else(
+      #   .data$filePublic,
+      #   "online",
+      #   "authenticate"
+      # ),
+      `dc:format` = .data$fileMediatype
+    ) %>%
+    # Set column order
+    dplyr::select(
+      "occurrenceID", "identifier", "dc:type", "comments", "dcterms:rights",
+      "CreateDate", "captureDevice", "resourceCreationTechnique", "accessURI",
+      "dc:format"
+    )
+
+  # Return object or write files
+  if (is.null(directory)) {
+    list(
+      dwc_occurrence = dplyr::as_tibble(dwc_occurrence),
+      dwc_audubon = dplyr::as_tibble(dwc_audubon)
+    )
+  } else {
+    dwc_occurrence_path <- file.path(directory, "dwc_occurrence.csv")
+    dwc_audubon_path <- file.path(directory, "dwc_audubon.csv")
+    meta_xml_path <- file.path(directory, "meta.xml")
+    message(glue::glue(
+      "Writing data to:",
+      dwc_occurrence_path,
+      dwc_audubon_path,
+      meta_xml_path,
+      .sep = "\n"
+    ))
+    if (!dir.exists(directory)) {
+      dir.create(directory, recursive = TRUE)
+    }
+    readr::write_csv(dwc_occurrence, dwc_occurrence_path, na = "")
+    readr::write_csv(dwc_audubon, dwc_audubon_path, na = "")
+    # Get static meta.xml file from package extdata
+    file.copy(
+      from = system.file("extdata", "meta.xml", package = "camtraptor"),
+      to = meta_xml_path
+    )
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
