@@ -37,6 +37,11 @@ observations <- read_resource(frictionless_data, "observations")
 media <- read_resource(frictionless_data, "media")
 ```
 
+```{r}
+a <- read_camtrap_dp("https://raw.githubusercontent.com/tdwg/camtrap-dp/1.0/example/datapackage.json")
+```
+
+
 # Darwin Core occurrence
 
 ## Occurrence Core
