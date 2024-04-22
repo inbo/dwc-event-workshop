@@ -22,12 +22,10 @@ flowchart LR
     media5("media"):::observation
     media6("media"):::observation
 
-    locationName("locationName"):::deployment
     latitude("latitude"):::deployment
     longitude("longitude"):::deployment
     deploymentStart("deploymentStart"):::deployment
     deploymentEnd("deploymentEnd"):::deployment
-    setupBy("setupBy"):::deployment
     cameratraits("camera traits (8)"):::deployment
     baitUse("baitUse"):::deployment
     habitat("habitat"):::deployment
@@ -40,9 +38,15 @@ flowchart LR
     count("count"):::observation
     lifeStage("lifeStage"):::observation
     sex("sex"):::observation
-    individualpositionRadius("individualpositionRadius"):::observation
     bboxX("bboxX"):::observation
     classification("classification"):::observation
+
+    eventStart2("eventStart"):::observation
+    eventEnd2("eventEnd"):::observation
+    observationType2("observationType"):::observation
+    scientificName2("scientificName"):::observation
+    count2("count"):::observation
+    etc("..."):::observation
 
     captureMethod("captureMethod"):::media
     timestamp("timestamp"):::media
@@ -55,13 +59,10 @@ flowchart LR
     classDef media       fill:#fff,stroke-width:1px,stroke:#000, stroke-dasharray:6;
 
 deployment --> event1
-
-deployment --> locationName
 deployment --> latitude
 deployment --> longitude
 deployment --> deploymentStart
 deployment --> deploymentEnd
-deployment --> setupBy
 deployment --> cameratraits
 deployment --> baitUse
 deployment --> habitat
@@ -69,12 +70,28 @@ deployment --> deploymentGroups
 
 
     event1 --> obs1
+        obs1 --> count2
+        obs1--> eventStart2
+        obs1 --> eventEnd2
+        obs1 --> observationType2
+        obs1 --> scientificName2
+        obs1 --> etc
+
     event1 --> media1
         media1 --> obs2
+             obs2 --> classification
     event1 --> media2
         media2 --> obs3
     event1 --> media3
         media3 --> obs4
+            obs4 --> count
+            obs4 --> lifeStage
+            obs4 --> sex
+            obs4 --> eventStart
+            obs4 --> eventEnd
+            obs4 --> observationType
+            obs4 --> scientificName
+            obs4 --> bboxX
     event1 --> media4
         media4 --> obs5
 
@@ -82,17 +99,7 @@ deployment --> deploymentGroups
 deployment --> event2
     event2 --> obs6
     event2 --> obs7
-        obs2 --> eventStart
-        obs2 --> eventEnd
-        obs2 --> observationType
-        obs2 --> scientificName
-        obs2 --> count
-        obs2 --> lifeStage
-        obs2 --> sex
-        obs2 --> individualpositionRadius
-        obs2 --> bboxX
-        obs2 --> classification
-    
+   
     event2 --> media5
         media5 --> obs8
         media5 --> captureMethod
