@@ -18,6 +18,7 @@ Install packages
 ```{r}
 install.packages("frictionless")
 devtools::install_github("inbo/camtraptor")
+devtools::install("../camtrapdp/")
 ```
 
 Load packages
@@ -25,209 +26,267 @@ Load packages
 ```{r}
 library(frictionless)
 library(camtraptor)
-library(tidyverse)      # To do data science
-```
-# Frictionless data
-
-```{r}
-frictionless_data <- read_package("https://raw.githubusercontent.com/tdwg/camtrap-dp/1.0/example/datapackage.json") 
-
-deployments <- read_resource(frictionless_data, "deployments")
-observations <- read_resource(frictionless_data, "observations")
-media <- read_resource(frictionless_data, "media")
+library(camtrapdp)
+library(tidyverse)
+library(here)
 ```
 
+# Camera Trap Data Package
+
 ```{r}
-a <- read_camtrap_dp("https://raw.githubusercontent.com/tdwg/camtrap-dp/1.0/example/datapackage.json")
+camtrapDP <- example_dataset()
+
+deployments <- read_resource(camtrapDP, "deployments")
+observations <- read_resource(camtrapDP, "observations")
+media <- read_resource(camtrapDP, "media")
+```
+
+Export data:
+
+```{r}
+write_csv(deployments, here("data", "camtrap_dp", "deployments.csv"), na = "")
+write_csv(observations, here("data", "camtrap_dp", "observations.csv"), na = "")
+write_csv(media, here("data", "camtrap_dp", "media.csv"), na = "")
 ```
 
 
-# Darwin Core occurrence
 
-## Occurrence Core
+# DwC - Occurrence Core mapping
+
+Write to Darwin Core:
 
 ```{r}
-  dwc_occurrence <-
-    deployments %>%
-    dplyr::right_join(
-      observations,
-      by = "deploymentID",
-      suffix = c(".dep", ".obs")
-    ) %>%
+write_dwc(x = camtrapDP, directory = "./data/dwc_occurrence/")
+```
+
+# DwC - Event Core mapping
+
+## Event Core
+
+```{r}
+# Create parent events (deployment) mapping
+
+parent_event <- 
+  deployments %>% mutate(
+    .keep = "none",
+    eventID = deploymentID,
+    parentEventID = "",
+    eventType = "deployment",
+    eventDate = glue::glue(
+      "{start}/{end}",
+      start = format(.data$deploymentStart, format = "%Y-%m-%dT%H:%M:%SZ"),
+      end = format(.data$deploymentEnd, format = "%Y-%m-%dT%H:%M:%SZ")),
+    habitat = .data$habitat,
+    samplingProtocol = "camera trap",
+    decimalLatitude = .data$latitude,
+    decimalLongitude = .data$longitude,
+    geodeticDatum = "EPSG:4326",
+    coordinateUncertaintyInMeters = .data$coordinateUncertainty,
+    locationID = .data$locationID,
+    locationName = .data$locationName)
+
+# Create events (sequence) mapping
+
+event <- 
+  observations %>% 
+    filter(observationLevel == "event"
+    ) %>% 
+  left_join(
+    select(deployments, deploymentID, latitude, longitude, coordinateUncertainty,locationID, locationName, habitat),
+    by = "deploymentID") %>% 
     dplyr::mutate(
       .keep = "none",
-      type = "Image",
-      license = "license",
-      rightsHolder = "rights_holder",
-      datasetID = "dataset_id",
-      collectionCode = "collection_code",
-      datasetName = "dataset_name",
-      basisOfRecord = "MachineObservation",
-
-## Occurrence
-                
-      occurrenceID = observationID,
-      individualCount = count,
-      sex = sex,
-      lifeStage =  lifeStage,
-      behavior = behavior,
-      occurrenceStatus = "present",
-      
-## Event
-      
-      eventID = eventID,
-      parentEventID = deploymentID,
-#     eventDate = format(.data$timestamp, format = "%Y-%m-%dT%H:%M:%SZ"),
-      habitat = habitat,
+      eventID = .data$eventID,
+      parentEventID = .data$deploymentID,
+      eventType = "sequence",
+      eventDate = glue::glue(
+       "{start}/{end}",
+        start = format(.data$eventStart, format = "%Y-%m-%dT%H:%M:%SZ"),
+        end = format(.data$eventEnd, format = "%Y-%m-%dT%H:%M:%SZ")),
+      habitat = .data$habitat,
       samplingProtocol = "camera trap",
-      samplingEffort = glue::glue(
-        "{start}/{end}",
-        start = format(eventStart, format = "%Y-%m-%dT%H:%M:%SZ"),
-        end = format(eventEnd, format = "%Y-%m-%dT%H:%M:%SZ")
-      ),
-      eventRemarks = "E.g. camera trap with bait near burrow | tags: <t1, t2> | <comment>",
+      decimalLatitude = .data$latitude,
+      decimalLongitude = .data$longitude,
+      geodeticDatum = "EPSG:4326",
+      coordinateUncertaintyInMeters = .data$coordinateUncertainty,
+      locationID = .data$locationID,
+      locationName = .data$locationName)
 
-      locationID = locationID,
-      locality = locationName,
-      decimalLatitude = latitude,
-      decimalLongitude = longitude,
-      geodeticDatum = "EPSG:4326", # WGS84
-      coordinateUncertaintyInMeters = coordinateUncertainty,
-      coordinatePrecision = "coordinate_precision",
-      identifiedBy = classifiedBy,
-      dateIdentified = format(
-        classificationTimestamp,
-        format = "%Y-%m-%dT%H:%M:%SZ"
-      ),
-      identificationRemarks = "{classification_method} {classification_certainty}",
+# Create child events (media-based observations) mapping
 
-      scientificName = .data$scientificName,
-      kingdom = "Animalia") %>%
-    # Set column order
-    dplyr::select(
-      "type", "license", "rightsHolder", "datasetID", "collectionCode",
-      "datasetName", "basisOfRecord", "occurrenceID",
-      "individualCount", "sex", "lifeStage", "behavior", "occurrenceStatus",
-      "eventID", "parentEventID",
-#      "eventDate", 
-      "habitat", "samplingProtocol", "samplingEffort",
-     "eventRemarks", "locationID", "locality", "decimalLatitude",
-      "decimalLongitude", "geodeticDatum", "coordinateUncertaintyInMeters",
-      "coordinatePrecision", "identifiedBy", "dateIdentified",
-      "identificationRemarks", "scientificName", "kingdom"
-    )
+child_1 <-
+  observations %>% 
+    filter(observationLevel == "media"
+    ) %>% 
+    left_join(
+    select(deployments, deploymentID, latitude, longitude, coordinateUncertainty,locationID, locationName, habitat),
+    by = "deploymentID") %>% 
+    dplyr::mutate(
+      .keep = "none",
+      eventID = .data$mediaID,
+      parentEventID = .data$eventID,
+      eventType = "media",
+      eventDate = format(.data$eventStart, format = "%Y-%m-%dT%H:%M:%SZ"),
+      habitat = .data$habitat,
+      samplingProtocol = "camera trap",
+      decimalLatitude = .data$latitude,
+      decimalLongitude = .data$longitude,
+      geodeticDatum = "EPSG:4326",
+      coordinateUncertaintyInMeters = .data$coordinateUncertainty,
+      locationID = .data$locationID,
+      locationName = .data$locationName)
 
+Create Event Core:
+
+
+```
+
+
+Create Event Core:
+
+```{r}
+dwc_event <- bind_rows(parent_event, event, child_1) %>% 
+  mutate( 
+    type = "Event",
+    rightsHolder = "Research Institute for Nature and Forest (INBO)",
+    datasetID = "7cca70f5-ef8c-4f86-85fb-8f070937d7ab",
+    datasetName = "Sample from: MICA - Muskrat and coypu camera trap observations in Belgium, the Netherlands and Germany",
+    dataGeneralizations = "coordinates rounded to 0.001 degree") %>% 
+  select(type, rightsHolder, datasetID, datasetName, dataGeneralizations, eventID, parentEventID, eventType, eventDate, habitat, samplingProtocol, decimalLatitude, decimalLongitude, geodeticDatum, coordinateUncertaintyInMeters, locationID, locationName)
+  
+```
+
+## Occurrence Extension:
+
+```{r}
+dwc_occurrence_ext <- 
+  observations %>% 
+# Filter observations on animal observations (excluding humans, blanks, etc.)
+  dplyr::filter(.data$observationType == "animal") %>% 
+  
+# Map to Dwc
+  dplyr::mutate(
+    .keep = "none",
+    
+    occurrenceID = .data$observationID,
+    individualCount = .data$count,
+    sex = .data$sex,
+    lifeStage = .data$lifeStage,
+    behavior = .data$behavior,
+    occurrenceStatus = "present",
+    eventID = case_when(
+      .data$observationLevel == "event" ~ .data$eventID,
+      .data$observationLevel == "media" ~ .data$mediaID
+    ),
+      .data$eventID,
+    identifiedBy = .data$classifiedBy,
+    dateIdentified = format(
+      .data$classificationTimestamp,
+      format = "%Y-%m-%dT%H:%M:%SZ"
+    ),
+    identificationRemarks = "identificationRemarks",
+    scientificName = .data$scientificName,
+    kingdom = "Animalia") %>% 
+  dplyr::select(occurrenceID, individualCount, sex, lifeStage, behavior, occurrenceStatus, eventID, identifiedBy,dateIdentified, identificationRemarks, scientificName, kingdom)
 ```
 
 ## Audubon Extension
 
-Create auduboncore
-Media can be linked to observations via sequenceID or mediaID
-Create mutually exclusive data frames for both cases and union (next step)
-
 ```{r}
-on_seq <-
-    observations %>%
-    dplyr::filter(is.na(mediaID)) %>%
-    dplyr::left_join(media, by = "sequenceID", suffix = c(".obs", "")) %>%
-    dplyr::select(dplyr::all_of(
-      c("observationID", "timestamp", colnames(media))
-      ))
-```
-```{r}
-on_med <-
-    observations %>%
-    dplyr::filter(!is.na(mediaID)) %>%
-    dplyr::left_join(media, by = "mediaID", suffix = c(".obs", "")) %>%
-    dplyr::select(dplyr::all_of(
-      c("observationID", "timestamp", colnames(media)
-    )))
-```
-
-
-
-
-  dwc_audubon <-
-    dplyr::bind_rows(on_seq, on_med) %>%
-    dplyr::left_join(
-      deployments,
-      by = "deploymentID",
-      suffix = c(".obs_med", ".dep")
-    ) %>%
-    dplyr::arrange(.data$deploymentID, .data$timestamp, .data$fileName) %>%
-    dplyr::mutate(
-      .keep = "none",
-      occurrenceID = .data$observationID,
-      identifier = .data$mediaID,
-      `dc:type` = dplyr::case_when(
-        grepl("video", fileMediatype) ~ "MovingImage",
-        .default = "StillImage"
+dwc_audubon <- 
+  media %>% dplyr::left_join(
+   select(observations, mediaID, eventID),
+   by = "mediaID"
+  ) %>% 
+  dplyr::mutate(
+    .keep = "none",
+    metadataLanguage = "http://id.loc.gov/vocabulary/iso639-2/eng",
+    eventID = .data$eventID,
+    identifier = .data$mediaID,
+    `dc:type` = dplyr::case_when(
+      grepl("video", fileMediatype) ~ "MovingImage",
+      .default = "StillImage"
       ),
-      comments = dplyr::case_when(
-        !is.na(favourite) & !is.na(comments.obs_med)
-          ~ paste("marked as favourite", comments.obs_med, sep = " | "),
-        !is.na(favourite) ~ "marked as favourite",
-        .default = .data$comments.obs_med
+     comments = dplyr::case_when(
+        !is.na(favorite) & !is.na(mediaComments)
+          ~ paste("marked as favourite", mediaComments, sep = " | "),
+        !is.na(favorite) ~ "marked as favourite",
+        .default = .data$mediaComments
       ),
-      `dcterms:rights` = media_license,
-      CreateDate = format(.data$timestamp, format = "%Y-%m-%dT%H:%M:%SZ"),
-      captureDevice = .data$cameraModel,
+     `dcterms:rights` = "http://creativecommons.org/licenses/by/4.0/",
+     CreateDate = format(.data$timestamp, format = "%Y-%m-%dT%H:%M:%SZ"),
+      captureDevice = "Reconyx-HF2X",
       resourceCreationTechnique = dplyr::recode(
         .data$captureMethod,
         "motionDetection" = "motion detection",
         "timeLapse" = "time lapse"
       ),
-      accessURI = .data$filePath,
-      # serviceExpectation = dplyr::if_else(
-      #   .data$filePublic,
-      #   "online",
-      #   "authenticate"
-      # ),
-      `dc:format` = .data$fileMediatype
-    ) %>%
+     accessURI = .data$filePath,
+    `dc:format` = .data$fileMediatype) %>%
+  
     # Set column order
     dplyr::select(
-      "occurrenceID", "identifier", "dc:type", "comments", "dcterms:rights",
+      "metadataLanguage", "eventID", "identifier", "dc:type", "comments", "dcterms:rights",
       "CreateDate", "captureDevice", "resourceCreationTechnique", "accessURI",
       "dc:format"
     )
 
-  # Return object or write files
-  if (is.null(directory)) {
-    list(
-      dwc_occurrence = dplyr::as_tibble(dwc_occurrence),
-      dwc_audubon = dplyr::as_tibble(dwc_audubon)
-    )
-  } else {
-    dwc_occurrence_path <- file.path(directory, "dwc_occurrence.csv")
-    dwc_audubon_path <- file.path(directory, "dwc_audubon.csv")
-    meta_xml_path <- file.path(directory, "meta.xml")
-    message(glue::glue(
-      "Writing data to:",
-      dwc_occurrence_path,
-      dwc_audubon_path,
-      meta_xml_path,
-      .sep = "\n"
-    ))
-    if (!dir.exists(directory)) {
-      dir.create(directory, recursive = TRUE)
-    }
-    readr::write_csv(dwc_occurrence, dwc_occurrence_path, na = "")
-    readr::write_csv(dwc_audubon, dwc_audubon_path, na = "")
-    # Get static meta.xml file from package extdata
-    file.copy(
-      from = system.file("extdata", "meta.xml", package = "camtraptor"),
-      to = meta_xml_path
-    )
-  }
-}
+
+```
+
+## Extended Measurement or Facts extension
 
 
+```{r}
+# eMoF linked to the deployment (parent event)
+
+emof_parent <- 
+ deployments %>% gather(
+   key = "measurementType",
+   value = "measurementValue",
+   setupBy, cameraID:detectionDistance,baitUse, deploymentGroups:deploymentComments) %>%  
+  select(deploymentID, measurementType, measurementValue) %>% 
+  mutate(
+   eventID = .data$deploymentID,
+   occurrenceID = "") %>% 
+  select(eventID, occurrenceID, measurementType, measurementValue)
+
+# eMoF linked to sequence-based observations (event)
+
+emof_event <-
+  observations %>% filter(
+    .data$observationLevel == "event") %>% 
+  gather(
+    key = "measurementType",
+    value = "measurementValue",
+    observationType, individualPositionRadius:classifiedBy) %>% 
+  mutate(
+    eventID = .data$eventID,
+    occurrenceID = .data$observationID) %>% 
+  select(eventID, occurrenceID, measurementType, measurementValue)
+
+# eMof linked to media-based observations
+
+emof_media <-
+  observations %>% filter(
+    .data$observationLevel == "media") %>% 
+  gather(
+    key = "measurementType",
+    value = "measurementValue",
+    observationType, individualPositionRadius:classifiedBy) %>% 
+  mutate(
+    eventID = .data$eventID,
+    occurrenceID = .data$observationID) %>% 
+  select(eventID, occurrenceID, measurementType, measurementValue)
+
+# Bind dataframes
+
+emof <- 
+  base::rbind(emof_parent, emof_event, emof_media) %>% 
+  dplyr::arrange(eventID, occurrenceID)
 
 
-
-
-
+```
 
 
 
