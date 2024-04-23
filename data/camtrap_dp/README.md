@@ -1,8 +1,8 @@
 ```mermaid
 flowchart LR
     deployment("deployment"):::deployment
-    event1("event"):::observation
-    event2("event"):::observation
+    seq1("sequence"):::observation
+    seq2("sequence"):::observation
 
     obs1("observation"):::observation
     obs2("observation"):::observation
@@ -26,7 +26,7 @@ flowchart LR
     longitude("longitude"):::deployment
     deploymentStart("deploymentStart"):::deployment
     deploymentEnd("deploymentEnd"):::deployment
-    cameratraits("camera traits (8)"):::deployment
+    cameraModel("cameraModel"):::deployment
     baitUse("baitUse"):::deployment
     habitat("habitat"):::deployment
     deploymentGroups("deploymentGroups"):::deployment
@@ -58,55 +58,66 @@ flowchart LR
     classDef observation fill:#ccc,stroke-width:1px,stroke:#000;
     classDef media       fill:#fff,stroke-width:1px,stroke:#000, stroke-dasharray:6;
 
-deployment --> event1
-deployment --> latitude
-deployment --> longitude
+%% Deployment level
+
+deployment --> seq1
+deployment --> seq2
+
 deployment --> deploymentStart
 deployment --> deploymentEnd
-deployment --> cameratraits
-deployment --> baitUse
+deployment --> latitude
+deployment --> longitude
 deployment --> habitat
+deployment --> cameraModel
+deployment --> baitUse
 deployment --> deploymentGroups
 
+%% Sequence 1
+seq1 --> obs1
+seq1 --> media1
+seq1 --> media2
+seq1 --> media3
+seq1 --> media4
 
-    event1 --> obs1
-        obs1 --> count2
-        obs1--> eventStart2
-        obs1 --> eventEnd2
-        obs1 --> observationType2
-        obs1 --> scientificName2
+    %% Sequence-based observation 1
+        obs1--> eventStart
+        obs1 --> eventEnd
+        obs1 --> count
+        obs1 --> observationType
+        obs1 --> scientificName
         obs1 --> etc
 
-    event1 --> media1
+    %% Media-based observation 1
         media1 --> obs2
-             obs2 --> classification
-    event1 --> media2
         media2 --> obs3
-    event1 --> media3
         media3 --> obs4
-            obs4 --> count
+            obs4 --> eventStart2
+            obs4 --> eventEnd2
+            obs4 --> count2
+            obs4 --> observationType2
             obs4 --> lifeStage
             obs4 --> sex
-            obs4 --> eventStart
-            obs4 --> eventEnd
-            obs4 --> observationType
-            obs4 --> scientificName
+            obs4 --> scientificName2
+            obs4 --> classification
             obs4 --> bboxX
-    event1 --> media4
         media4 --> obs5
 
+%% Sequence 2
+seq2 --> obs6
+seq2 --> obs7
+seq2 --> media5
+seq2 --> media6
 
-deployment --> event2
-    event2 --> obs6
-    event2 --> obs7
-   
-    event2 --> media5
+    %% Media-based observation 2
         media5 --> obs8
+        media6 --> obs9
+
+
+        %% Multimedia files
         media5 --> captureMethod
         media5 --> timestamp
         media5 --> filePath
         media5 --> fileName
         media5 --> fileMediaType
-    event2 --> media6
-        media6 --> obs9
+
 ```
