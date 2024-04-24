@@ -1,123 +1,64 @@
 ```mermaid
 flowchart LR
-    deployment("deployment"):::deployment
-    seq1("sequence"):::observation
-    seq2("sequence"):::observation
+    classDef prj_event fill:#fff,stroke:#65BDFF,stroke-width:4px;
+    classDef dep_event fill:#fff,stroke:#D86C5D,stroke-width:4px;
+    classDef med_file fill:#fff,stroke:#DAA25E,stroke-width:1px;
+    classDef obs_event fill:#fff,stroke:#37805B,stroke-width:4px;
+    classDef seq_event fill:#fff,stroke:#37805B,stroke-width:4px;
 
-    obs1("observation"):::observation
-    obs2("observation"):::observation
-    obs3("observation"):::observation
-    obs4("observation"):::observation
-    obs5("observation"):::observation
-    obs6("observation"):::observation
-    obs7("observation"):::observation
-    obs8("observation"):::observation
-    obs9("observation"):::observation
+    prj0("`**project/dataset**`"):::prj_event
+    dep0("`**deployment**
+        deploymentStart, deploymentEnd, latitude
+        longitude, habitat, cameraModel, baitUse, ...`"):::dep_event
+    med0("`**media**
+        timestamp, captureMethod, filePath, fileMediaType, ...`"):::med_file
+    obs0("`**observation**
+        eventStart, eventEnd, scientificName, count, lifeStage, sex, ...`"):::obs_event
+    prj0 --> dep0 --> med0 ---> obs0
+
+    prj1("project/dataset"):::prj_event
     
+    dep1("deployment 1"):::dep_event
+    med1_1("media 1"):::med_file
+    med1_2("media 2"):::med_file
+    med1_3("media 3"):::med_file
+    med1_4("media 4"):::med_file
+    obs1_1("observation 1"):::obs_event
+    obs1_2a("observation 2"):::obs_event
+    obs1_2b("observation 3"):::obs_event
+    obs1_3("observation 4"):::obs_event
+    obs1_4("observation 5"):::obs_event
+    prj1 --> dep1
+    dep1 --> med1_1
+    dep1 --> med1_2
+    dep1 --> med1_3
+    dep1 --> med1_4
+    med1_1 ---> obs1_1
+    med1_2 ---> obs1_2a
+    med1_2 ---> obs1_2b
+    med1_3 ---> obs1_3
+    med1_4 ---> obs1_4
 
-    media1("media"):::observation
-    media2("media"):::observation
-    media3("media"):::observation
-    media4("media"):::observation
-    media5("media"):::observation
-    media6("media"):::observation
-
-    latitude("latitude"):::deployment
-    longitude("longitude"):::deployment
-    deploymentStart("deploymentStart"):::deployment
-    deploymentEnd("deploymentEnd"):::deployment
-    cameraModel("cameraModel"):::deployment
-    baitUse("baitUse"):::deployment
-    habitat("habitat"):::deployment
-    deploymentGroups("deploymentGroups"):::deployment
-
-    eventStart("eventStart"):::observation
-    eventEnd("eventEnd"):::observation
-    observationType("observationType"):::observation
-    scientificName("scientificName"):::observation
-    count("count"):::observation
-    lifeStage("lifeStage"):::observation
-    sex("sex"):::observation
-    bboxX("bboxX"):::observation
-    classification("classification"):::observation
-
-    eventStart2("eventStart"):::observation
-    eventEnd2("eventEnd"):::observation
-    observationType2("observationType"):::observation
-    scientificName2("scientificName"):::observation
-    count2("count"):::observation
-    etc("..."):::observation
-
-    captureMethod("captureMethod"):::media
-    timestamp("timestamp"):::media
-    filePath("filePath"):::media
-    fileName("fileName"):::media
-    fileMediaType("fileMediaType"):::media
-
-    classDef deployment fill:#fff,stroke-width:4px,stroke:#000;
-    classDef observation fill:#ccc,stroke-width:1px,stroke:#000;
-    classDef media       fill:#fff,stroke-width:1px,stroke:#000, stroke-dasharray:6;
-
-%% Deployment level
-
-deployment --> seq1
-deployment --> seq2
-
-deployment --> deploymentStart
-deployment --> deploymentEnd
-deployment --> latitude
-deployment --> longitude
-deployment --> habitat
-deployment --> cameraModel
-deployment --> baitUse
-deployment --> deploymentGroups
-
-%% Sequence 1
-seq1 --> obs1
-seq1 --> media1
-seq1 --> media2
-seq1 --> media3
-seq1 --> media4
-
-    %% Sequence-based observation 1
-        obs1--> eventStart
-        obs1 --> eventEnd
-        obs1 --> count
-        obs1 --> observationType
-        obs1 --> scientificName
-        obs1 --> etc
-
-    %% Media-based observation 1
-        media1 --> obs2
-        media2 --> obs3
-        media3 --> obs4
-            obs4 --> eventStart2
-            obs4 --> eventEnd2
-            obs4 --> count2
-            obs4 --> observationType2
-            obs4 --> lifeStage
-            obs4 --> sex
-            obs4 --> scientificName2
-            obs4 --> classification
-            obs4 --> bboxX
-        media4 --> obs5
-
-%% Sequence 2
-seq2 --> obs6
-seq2 --> obs7
-seq2 --> media5
-seq2 --> media6
-
-    %% Media-based observation 2
-        media5 --> obs8
-        media6 --> obs9
-
-
-        %% Multimedia files
-        media5 --> captureMethod
-        media5 --> timestamp
-        media5 --> filePath
-        media5 --> fileName
-        media5 --> fileMediaType
-
+    dep2("deployment 2"):::dep_event
+    med2_1("media 5"):::med_file
+    med2_2("media 6"):::med_file
+    med2_3("media 7"):::med_file
+    med2_4("media 8"):::med_file
+    seq2_1("sequence 1"):::seq_event
+    seq2_2("sequence 2"):::seq_event
+    obs2_1("observation 6"):::obs_event
+    obs2_2("observation 7"):::obs_event
+    obs2_3("observation 8"):::obs_event
+    prj1 --> dep2
+    dep2 --> med2_1
+    dep2 --> med2_2
+    dep2 --> med2_3
+    dep2 --> med2_4
+    med2_1 --> seq2_1
+    med2_2 --> seq2_1
+    med2_3 --> seq2_2
+    med2_4 --> seq2_2
+    seq2_1 --> obs2_1
+    seq2_1 --> obs2_2
+    seq2_2 --> obs2_3
 ```
