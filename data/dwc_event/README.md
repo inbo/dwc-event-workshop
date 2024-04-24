@@ -1,128 +1,103 @@
 ```mermaid
 flowchart LR
+    classDef prj_event fill:#fff,stroke:#65BDFF,stroke-width:4px;
+    classDef dep_event fill:#fff,stroke:#D86C5D,stroke-width:4px;
+    classDef seq_event fill:#fff,stroke:#D86C5D,stroke-width:4px;
+    classDef media_event fill:#fff,stroke:#D86C5D,stroke-width:4px;
+    classDef occ_ext fill:#fff,stroke:#37805B,stroke-width:1px;
+    classDef media_ext fill:#fff,stroke:#DAA25E,stroke-width:1px;
+    classDef emof_ext fill:#fff,stroke:#896CFF,stroke-width:1px,stroke-dasharray:6;
 
-deployment("deployment"):::event
+    prj0("`**project/dataset**`"):::prj_event
+    dep0("`**deployment**
+        eventDate, latitude
+        longitude, habitat, samplingProtocol, ...`"):::dep_event
+    seq0("`**sequence**
+        eventDate, latitude
+        longitude, habitat, samplingProtocol, ...`"):::seq_event
+    med0("`**media-event**
+        eventDate, latitude
+        longitude, habitat, samplingProtocol, ...`"):::media_event
+    obs0("`**occurrence**
+        scientificName, individualCount, lifeStage, sex, identifiedBy`"):::occ_ext
+    aud0("`**media**
+        timestamp, captureMethod, filePath, fileMediaType, ...`"):::media_ext
+    emof_dep0("`**eMoF**,
+        setupBy, cameraModel,
+        cameraDelay, cameraDepth, 
+        baitUse,...`"):::emof_ext
+    emof_obs0("`**eMoF**,
+        observationType, classificationMethod,...`"):::emof_ext
+       
+    prj0 --> dep0 --> seq0 --> med0 ---> obs0
+    med0-->aud0
+    dep0------>emof_dep0
+    obs0--> emof_obs0
 
-seq1("sequence1"):::event
-seq2("sequence2"):::event
-eventDate1("eventDate"):::event
-habitat("habitat"):::event
-samplingProtocol("samplingProtocol"):::event
-latitude("latitude"):::event
-longitude("longitude"):::event
+    prj1("project/dataset"):::prj_event
+    
+    dep1("deployment 1"):::dep_event
+    dep2("deployment 2"):::dep_event
 
-media1("media"):::event
-media2("media"):::event
-media3("media"):::event
-media4("media"):::event
-media5("media"):::event
-media6("media"):::event
+    seq1_1("sequence 1"):::seq_event
+    seq1_2("sequence 2"):::seq_event
+    seq2_1("sequence 3"):::seq_event
+    seq2_2("sequence 4"):::seq_event
 
-eventDate2("eventDate"):::event
-eventDate3("eventDate"):::event
-
-obs1("observation"):::occurrence
-obs2("observation"):::occurrence
-obs3("observation"):::occurrence
-obs4("observation"):::occurrence
-obs5("observation"):::occurrence
-obs6("observation"):::occurrence
-obs7("observation"):::occurrence
-obs8("observation"):::occurrence
-obs9("observation"):::occurrence
-
-indivivualCount("indivivualCount"):::occurrence
-sex("sex"):::occurrence
-lifeStage("lifeStage"):::occurrence
-behaviour("behaviour"):::occurrence
-identifiedBy("identifiedBy"):::occurrence
-dateIdentified("dateIdentified"):::occurrence
-scientificName("scientificName"):::occurrence
-
-indivivualCount2("indivivualCount2"):::occurrence
-sex2("sex2"):::occurrence
-lifeStage2("lifeStage2"):::occurrence
-behaviour2("behaviour2"):::occurrence
-identifiedBy2("identifiedBy2"):::occurrence
-dateIdentified2("dateIdentified2"):::occurrence
-scientificName2("scientificName"):::occurrence
-
-createDate("createDate"):::audubon
-captureDevice("captureDevice"):::audubon
-resourceCreatonTechnique("resourceCreatonTechnique"):::audubon
-accessURI("accessURI"):::audubon
-format("format"):::audubon
-
-cameraModel("cameraModel"):::emof
-cameraHeight("cameraHeight"):::emof
-baitUse("baitUse"):::emof
-
-classDef event fill:#fff,stroke-width:4px,stroke:#000;
-classDef occurrence fill:#ccc,stroke-width:1px,stroke:#000;
-classDef audubon fill:#fff,stroke-width:1px,stroke:#000, stroke-dasharray:6;
-classDef emof fill:#fff,stroke-width:4px,stroke:#000, stroke-dasharray:6;
-
-%% Deployment level
-
-deployment --> seq1
-deployment --> seq2
-
-deployment --> eventDate1
-deployment --> latitude
-deployment --> longitude
-deployment --> habitat
-deployment --> samplingProtocol
-
-deployment --> cameraModel
-deployment --> cameraHeight
-deployment --> baitUse
-
-%% Sequence 1
-seq1--> eventDate2
-
-seq1 --> obs1
-seq1 --> media1
-seq1 --> media2
-seq1 --> media3
-seq1 --> media4
-
-    %% Sequence-based observation 1
-    obs1 --> indivivualCount
-    obs1 --> sex
-    obs1 --> lifeStage
-    obs1 --> behaviour
-    obs1 --> identifiedBy
-    obs1 --> dateIdentified 
-    obs1 --> scientificName
-
-    %% Media-based observation 1
-        media1 --> obs2
-        media2 --> obs3
-        media3 --> obs4
-            obs4 --> eventDate3
-            obs4 --> indivivualCount2
-            obs4 --> sex2
-            obs4 --> lifeStage2
-            obs4 --> behaviour2
-            obs4 --> identifiedBy2
-            obs4 --> dateIdentified2
-            obs4 --> scientificName2
-        media4 --> obs5
+    media2_1a("media-event1"):::media_event
+    media2_1b("media-event2"):::media_event
+    media2_2a("media-event3"):::media_event
+    media2_2b("media-event2"):::media_event
 
 
-%% Sequence 2
-seq2 --> obs6
-seq2 --> obs7
-seq2 --> media5
-seq2 --> media6
+    obs1_1("occurrence 1"):::occ_ext
+    obs1_2a("occurrence 2"):::occ_ext
+    obs1_2b("occurrence 3"):::occ_ext
+    occ2_1a("occurrence 4"):::occ_ext
+    occ2_1b1("occurrence 5"):::occ_ext
+    occ2_1b2("occurrence 6"):::occ_ext
+    occ2_2a("occurrence 7"):::occ_ext
+    occ2_2b("occurrence 8"):::occ_ext
 
-seq2 --> createDate
-seq2 --> captureDevice
-seq2 --> resourceCreatonTechnique
-seq2 --> accessURI
+    aud2_1a("media 1"):::media_ext
+    aud2_1b("media 2"):::media_ext
+    aud2_2a("media 3"):::media_ext
+    aud2_2b("media 4"):::media_ext
+
+    emof_dep1("eMoF"):::emof_ext
+    emof_dep2("eMoF"):::emof_ext
+    emof_obs1("eMoF"):::emof_ext
+    emof_obs2("eMoF"):::emof_ext
+    emof_obs3("eMoF"):::emof_ext
+    emof_obs4("eMoF"):::emof_ext
+    emof_obs5("eMoF"):::emof_ext
+    emof_obs6("eMoF"):::emof_ext
+    emof_obs7("eMoF"):::emof_ext
+    emof_obs8("eMoF"):::emof_ext
+    emof_obs9("eMoF"):::emof_ext
+
+    prj1-->dep1
+        dep1 --> seq1_1
+            seq1_1---->obs1_1 -->emof_obs1
+        dep1 --> seq1_2
+            seq1_2---->obs1_2a-->emof_obs2
+            seq1_2---->obs1_2b-->emof_obs3
+        dep1------>emof_dep1
+    prj1-->dep2
+        dep2-->seq2_1
+            seq2_1-->media2_1a
+                media2_1a--->occ2_1a-->emof_obs4
+                media2_1a-->aud2_1a
+            seq2_1-->media2_1b
+                media2_1b--->occ2_1b1-->emof_obs5
+                media2_1b--->occ2_1b2-->emof_obs6
+                media2_1b-->aud2_1b
+        dep2-->seq2_2
+            seq2_2-->media2_2a
+                media2_2a--->occ2_2a-->emof_obs7
+                media2_2a-->aud2_2a-->emof_obs8
+            seq2_2-->media2_2b
+                media2_2b--->occ2_2b-->emof_obs9
+                media2_2b-->aud2_2b
+        dep2------>emof_dep2
 ```
-seq2 --> format
-
-    %% Media-based observation 2
-    media5 --> obs8
-    media6 --> obs9
