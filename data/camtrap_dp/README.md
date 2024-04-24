@@ -19,46 +19,46 @@ flowchart LR
     prj1("project/dataset"):::prj_event
     
     dep1("deployment 1"):::dep_event
-    med1_1("media 1"):::med_file
-    med1_2("media 2"):::med_file
-    med1_3("media 3"):::med_file
-    med1_4("media 4"):::med_file
-    obs1_1("observation 1"):::obs_event
-    obs1_2a("observation 2"):::obs_event
-    obs1_2b("observation 3"):::obs_event
-    obs1_3("observation 4"):::obs_event
-    obs1_4("observation 5"):::obs_event
+    med1("media 1"):::med_file
+    med2("media 2"):::med_file
+    med3("media 3"):::med_file
+    med4("media 4"):::med_file
+    obs1("observation 1"):::obs_event
+    obs2("observation 2"):::obs_event
+    obs3("observation 3"):::obs_event
+    obs4("observation 4"):::obs_event
+    obs5("observation 5"):::obs_event
     prj1 --> dep1
-    dep1 --> med1_1
-    dep1 --> med1_2
-    dep1 --> med1_3
-    dep1 --> med1_4
-    med1_1 ---> obs1_1
-    med1_2 ---> obs1_2a
-    med1_2 ---> obs1_2b
-    med1_3 ---> obs1_3
-    med1_4 ---> obs1_4
+    dep1 --> med1
+    dep1 --> med2
+    dep1 --> med3
+    dep1 --> med4
+    med1 ---> obs1
+    med2 ---> obs2
+    med2 ---> obs3
+    med3 ---> obs4
+    med4 ---> obs5
 
     dep2("deployment 2"):::dep_event
-    med2_1("media 5"):::med_file
-    med2_2("media 6"):::med_file
-    med2_3("media 7"):::med_file
-    med2_4("media 8"):::med_file
-    seq2_1("sequence 1"):::seq_event
-    seq2_2("sequence 2"):::seq_event
-    obs2_1("observation 6"):::obs_event
-    obs2_2("observation 7"):::obs_event
-    obs2_3("observation 8"):::obs_event
+    med5("media 5"):::med_file
+    med6("media 6"):::med_file
+    med7("media 7"):::med_file
+    med8("media 8"):::med_file
+    seq1("sequence 1"):::seq_event
+    seq2("sequence 2"):::seq_event
+    obs6("observation 6"):::obs_event
+    obs7("observation 7"):::obs_event
+    obs8("observation 8"):::obs_event
     prj1 --> dep2
-    dep2 --> med2_1
-    dep2 --> med2_2
-    dep2 --> med2_3
-    dep2 --> med2_4
-    med2_1 --> seq2_1
-    med2_2 --> seq2_1
-    med2_3 --> seq2_2
-    med2_4 --> seq2_2
-    seq2_1 --> obs2_1
-    seq2_1 --> obs2_2
-    seq2_2 --> obs2_3
+    dep2 --> med5
+    dep2 --> med6
+    dep2 --> med7
+    dep2 --> med8
+    med5 --> seq1
+    med6 --> seq1
+    med7 --> seq2
+    med8 --> seq2
+    seq1 --> obs6
+    seq1 --> obs7
+    seq2 --> obs8
 ```
