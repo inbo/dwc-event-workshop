@@ -8,12 +8,12 @@ flowchart LR
 
     prj0("`**project/dataset**`"):::prj_event
     dep0("`**deployment**
-        deploymentStart, deploymentEnd, latitude
+        deploymentStart (T0), deploymentEnd (T100), latitude
         longitude, habitat, cameraModel, baitUse, ...`"):::dep_event
     med0("`**media**
-        timestamp, captureMethod, filePath, fileMediaType, ...`"):::med_file
+        timestamp (T1), captureMethod, filePath, fileMediaType, ...`"):::med_file
     obs0("`**observation**
-        eventStart, eventEnd, scientificName, count, lifeStage, sex, ...`"):::obs_event
+        eventStart (T1), eventEnd (T1), scientificName, count, lifeStage, sex, ...`"):::obs_event
     prj0 --> dep0 --> med0 ---> obs0
 
     prj1("project/dataset"):::prj_event
