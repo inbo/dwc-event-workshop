@@ -1,12 +1,12 @@
 ```mermaid
 flowchart LR
-    classDef prj_event fill:#fff,stroke:#65BDFF,stroke-width:4px;
+    classDef prj_event fill:#fff,stroke:#65BDFF,stroke-width:4px,stroke-dasharray:6;
     classDef dep_event fill:#fff,stroke:#D86C5D,stroke-width:4px;
     classDef seq_event fill:#fff,stroke:#D86C5D,stroke-width:4px;
     classDef media_event fill:#fff,stroke:#D86C5D,stroke-width:4px;
     classDef occ_ext fill:#fff,stroke:#37805B,stroke-width:1px;
     classDef media_ext fill:#fff,stroke:#DAA25E,stroke-width:1px;
-    classDef emof_ext fill:#fff,stroke:#896CFF,stroke-width:1px,stroke-dasharray:6;
+    classDef emof_ext fill:#fff,stroke:#896CFF,stroke-width:1px;
 
     prj0("`**project/dataset**`"):::prj_event
     dep0("`**deployment**
