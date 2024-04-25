@@ -3,7 +3,7 @@ flowchart LR
     classDef prj_event fill:#fff,stroke:#65BDFF,stroke-width:4px;
     classDef dep_event fill:#fff,stroke:#D86C5D,stroke-width:4px;
     classDef obs_event fill:#fff,stroke:#37805B,stroke-width:4px;
-    classDef seq_event fill:#fff,stroke:#37805B,stroke-width:4px;
+    classDef seq_event fill:#fff,stroke:#37805B,stroke-width:4px,stroke-dasharray:6;
     classDef med_file fill:#fff,stroke:#DAA25E,stroke-width:1px;
 
     prj0("`**project/dataset**`"):::prj_event
