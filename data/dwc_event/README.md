@@ -4,9 +4,9 @@ flowchart LR
     classDef dep_event fill:#fff,stroke:#D86C5D,stroke-width:4px;
     classDef seq_event fill:#fff,stroke:#D86C5D,stroke-width:4px;
     classDef media_event fill:#fff,stroke:#D86C5D,stroke-width:4px;
-    classDef occ_ext fill:#fff,stroke:#37805B,stroke-width:1px;
-    classDef media_ext fill:#fff,stroke:#DAA25E,stroke-width:1px;
-    classDef emof_ext fill:#fff,stroke:#896CFF,stroke-width:1px;
+    classDef occ_ext fill:#fff,stroke:#37805B,stroke-width:2px;
+    classDef media_ext fill:#fff,stroke:#DAA25E,stroke-width:2px;
+    classDef emof_ext fill:#fff,stroke:#896CFF,stroke-width:2px;
 
     prj0("`**project/dataset**`"):::prj_event
     dep0("`**deployment**

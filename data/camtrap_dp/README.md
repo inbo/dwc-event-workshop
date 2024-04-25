@@ -4,7 +4,7 @@ flowchart LR
     classDef dep_event fill:#fff,stroke:#D86C5D,stroke-width:4px;
     classDef obs_event fill:#fff,stroke:#37805B,stroke-width:4px;
     classDef seq_event fill:#fff,stroke:#37805B,stroke-width:4px,stroke-dasharray:6;
-    classDef med_file fill:#fff,stroke:#DAA25E,stroke-width:1px;
+    classDef med_file fill:#fff,stroke:#DAA25E,stroke-width:2px;
 
     prj0("`**project/dataset**`"):::prj_event
     dep0("`**deployment**
@@ -44,8 +44,8 @@ flowchart LR
     medfile6("media 6"):::med_file
     medfile7("media 7"):::med_file
     medfile8("media 8"):::med_file
-    seq1("sequence 1"):::seq_event
-    seq2("sequence 2"):::seq_event
+    seq1("sequence 1 (eventID)"):::seq_event
+    seq2("sequence 2 (eventID)"):::seq_event
     obs6("observation 6"):::obs_event
     obs7("observation 7"):::obs_event
     obs8("observation 8"):::obs_event
