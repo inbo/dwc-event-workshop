@@ -16,9 +16,9 @@ output:
 Install packages
 
 ```{r}
-install.packages("frictionless")
-devtools::install_github("inbo/camtraptor")
-devtools::install("../camtrapdp/")
+#install.packages("frictionless")
+#devtools::install_github("inbo/camtraptor")
+#devtools::install("../camtrapdp/")
 ```
 
 Load packages
@@ -136,15 +136,8 @@ child_1 <-
       locationID = .data$locationID,
       locationName = .data$locationName)
 
-Create Event Core:
+# Create Event Core:
 
-
-```
-
-
-Create Event Core:
-
-```{r}
 dwc_event <- bind_rows(parent_event, event, child_1) %>% 
   mutate( 
     type = "Event",
@@ -167,18 +160,18 @@ dwc_occurrence_ext <-
 # Map to Dwc
   dplyr::mutate(
     .keep = "none",
-    
-    occurrenceID = .data$observationID,
+     occurrenceID = .data$observationID,
     individualCount = .data$count,
     sex = .data$sex,
     lifeStage = .data$lifeStage,
     behavior = .data$behavior,
     occurrenceStatus = "present",
-    eventID = case_when(
-      .data$observationLevel == "event" ~ .data$eventID,
-      .data$observationLevel == "media" ~ .data$mediaID
+    associatedMedia = case_when(
+      is.na(.data$mediaID) ~ "URL 1 | URL 2 | URL 3 | etc.",
+      TRUE ~ "URL"
     ),
-      .data$eventID,
+    eventID = .data$eventID,
+    parentEventID = .data$deploymentID,
     identifiedBy = .data$classifiedBy,
     dateIdentified = format(
       .data$classificationTimestamp,
@@ -187,7 +180,7 @@ dwc_occurrence_ext <-
     identificationRemarks = "identificationRemarks",
     scientificName = .data$scientificName,
     kingdom = "Animalia") %>% 
-  dplyr::select(occurrenceID, individualCount, sex, lifeStage, behavior, occurrenceStatus, eventID, identifiedBy,dateIdentified, identificationRemarks, scientificName, kingdom)
+  dplyr::select(occurrenceID, individualCount, sex, lifeStage, behavior, occurrenceStatus, associatedMedia, eventID, parentEventID, identifiedBy,dateIdentified, identificationRemarks, scientificName, kingdom)
 ```
 
 ## Audubon Extension
@@ -236,7 +229,6 @@ dwc_audubon <-
 
 ## Extended Measurement or Facts extension
 
-
 ```{r}
 # eMoF linked to the deployment (parent event)
 
@@ -281,13 +273,21 @@ emof_media <-
 
 # Bind dataframes
 
-emof <- 
+dwc_emof <- 
   base::rbind(emof_parent, emof_event, emof_media) %>% 
   dplyr::arrange(eventID, occurrenceID)
 
 
 ```
+Export datasets:
 
+```{r}
+write_csv(dwc_event, here("data", "dwc_event", "event.csv"), na = "")
+write_csv(dwc_occurrence_ext, here("data", "dwc_event", "occurrence.csv"), na = "")
+write_csv(dwc_audubon, here("data", "dwc_event", "audubon.csv"), na = "")
+write_csv(dwc_emof, here("data", "dwc_event", "emof.csv"), na = "")
+
+```
 
 
 
